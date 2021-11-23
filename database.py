@@ -3,20 +3,29 @@ import asyncpg
 from config import DATABASE
 
 
+GUILDS_TABLE = '''CREATE TABLE IF NOT EXISTS guilds(id BIGINT PRIMARY KEY, 
+                    prefixes TEXT[] NOT NULL);'''
+
+TAG_TABLE = '''CREATE TABLE IF NOT EXISTS tags(guild BIGINT, author BIGINT, 
+                name TEXT, content TEXT, uses INT DEFAULT 0, 
+                created TIMESTAMPTZ default current_timestamp(0), 
+                last_used TIMESTAMPZ'''
+
+TABLES = [GUILDS_TABLE, TAG_TABLE]
+
+
 class Database:
     def __init__(self):
         self.cache = {}
         self.conn = None
 
     async def initialise(self):
-        stat = '''CREATE TABLE IF NOT EXISTS guilds(
-            id BIGINT PRIMARY KEY,
-            prefixes TEXT[] NOT NULL);'''
         self.conn = await asyncpg.connect(**DATABASE)
-        await self.conn.execute(stat)
-        await self.pull()
+        for stat in TABLES:
+            await self.conn.execute(stat)
+        await self.pull_configs()
 
-    async def push(self):
+    async def push_configs(self):
         async with self.conn.transaction():
             for conf in self.cache.values():
                 if conf.get('in-sync', True):
@@ -30,7 +39,7 @@ class Database:
                 await self.conn.execute(stat, conf['id'], conf['prefixes'])
                 conf['in-sync'] = conf['in-db'] = True
 
-    async def pull(self):
+    async def pull_configs(self):
         records = await self.conn.fetch('SELECT * FROM guilds')
         self.cache = {r['id']: {k: v for k, v in r.items()} for r in records}
 
@@ -44,5 +53,5 @@ class Database:
         return self.cache[id]
 
     async def close(self):
-        await self.push()
+        await self.push_configs()
         await self.conn.close()
