@@ -3,13 +3,13 @@ import asyncpg
 from config import DATABASE
 
 
-GUILDS_TABLE = '''CREATE TABLE IF NOT EXISTS guilds(id BIGINT PRIMARY KEY, 
+GUILDS_TABLE = '''CREATE TABLE IF NOT EXISTS guilds(id BIGINT PRIMARY KEY,
                     prefixes TEXT[] NOT NULL);'''
 
-TAG_TABLE = '''CREATE TABLE IF NOT EXISTS tags(guild BIGINT, author BIGINT, 
+TAG_TABLE = '''CREATE TABLE IF NOT EXISTS tags(guild BIGINT, author BIGINT,
                 name TEXT, content TEXT, uses INT DEFAULT 0, 
                 created TIMESTAMPTZ default current_timestamp(0), 
-                last_used TIMESTAMPZ'''
+                last_used TIMESTAMPTZ);'''
 
 TABLES = [GUILDS_TABLE, TAG_TABLE]
 
@@ -51,6 +51,10 @@ class Database:
         self.cache[guild_id] = {'id': guild_id, 'prefixes': [],
                                 'in-sync': False, 'in-db': False}
         return self.cache[id]
+
+    async def get_tag(self, tag, guild):
+        stat = 'SELECT * FROM tags WHERE name=$1 AND guild=$2'
+        return await self.conn.fetchrow(stat, tag, guild)
 
     async def close(self):
         await self.push_configs()
