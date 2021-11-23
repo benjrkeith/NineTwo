@@ -38,7 +38,7 @@ class AdminCore(cmds.Cog):
     @ext_cmd.command(name='unload')
     async def ext_unload_cmd(self, ctx, ext):
         if ext == 'core':
-            return await ctx.reply('`{ext}` is required.')
+            return await ctx.reply(f'`{ext}` is required.')
 
         ext = f'extensions.{ext}'
         try:
