@@ -21,11 +21,13 @@ class Tag:
 class Tags(cmds.Cog):
     @cmds.group(name='tag', aliases=['t'], invoke_without_command=True)
     async def tag_cmd(self, ctx, *, tag: Tag):
-        await ctx.reply(tag.content)
+        target = ctx.message.reference if ctx.message.reference else ctx
+        target.reply(tag.content)
 
     @tag_cmd.command(name='new')
     async def tag_new_cmd(self, ctx, name, *, content):
-        pass
+        await ctx.bot.db.new_tag(ctx.guild.id, ctx.author.id, name, content)
+        await ctx.reply(f'Tag `{name}` has been created.')
 
     @tag_cmd.command(name='del')
     async def tag_del_cmd(self, ctx, *, name):

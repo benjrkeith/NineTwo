@@ -6,8 +6,9 @@ from config import DATABASE
 GUILDS_TABLE = '''CREATE TABLE IF NOT EXISTS guilds(id BIGINT PRIMARY KEY,
                     prefixes TEXT[] NOT NULL);'''
 
-TAG_TABLE = '''CREATE TABLE IF NOT EXISTS tags(guild BIGINT, author BIGINT,
-                name TEXT, content TEXT, uses INT DEFAULT 0, 
+TAG_TABLE = '''CREATE TABLE IF NOT EXISTS tags(guild BIGINT NOT NULL,
+                author BIGINT NOT NULL, name TEXT NOT NULL, 
+                content TEXT NOT NULL, uses INT DEFAULT 0, 
                 created TIMESTAMPTZ default current_timestamp(0), 
                 last_used TIMESTAMPTZ, PRIMARY KEY(name, guild));'''
 
@@ -55,6 +56,11 @@ class Database:
     async def get_tag(self, tag, guild):
         stat = 'SELECT * FROM tags WHERE name=$1 AND guild=$2'
         return await self.conn.fetchrow(stat, tag, guild)
+
+    async def new_tag(self, guild, author, name, content):
+        stat = '''INSERT INTO tags(guild, author, name, content)
+                    VALUES($1, $2, $3, $4);'''
+        await self.conn.execute(stat, guild, author, name, content)
 
     async def close(self):
         await self.push_configs()
