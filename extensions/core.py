@@ -8,7 +8,7 @@ class Core(commands.Cog):
 
 class AdminCore(commands.Cog):
     def cog_check(self, ctx):
-        return ctx.author.id == 419599149596672001
+        return ctx.author.id == ctx.bot.owner_id
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
