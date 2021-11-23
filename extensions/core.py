@@ -21,10 +21,11 @@ class AdminCore(commands.Cog):
 
 class ServerAdminCore(commands.Cog):
     def cog_check(self, ctx):
-        return True
+        return ctx.author.guild_permissions.manage_guild
 
     async def cog_command_error(self, ctx, error):
-        return await super().cog_command_error(ctx, error)
+        if isinstance(error, commands.CheckFailure):
+            await ctx.reply('Only server admins can use this command.')
 
     @commands.group(name='prefix', invoke_without_command=True)
     async def prefix_cmd(self, ctx):
