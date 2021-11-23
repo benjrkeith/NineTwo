@@ -9,7 +9,7 @@ GUILDS_TABLE = '''CREATE TABLE IF NOT EXISTS guilds(id BIGINT PRIMARY KEY,
 TAG_TABLE = '''CREATE TABLE IF NOT EXISTS tags(guild BIGINT, author BIGINT,
                 name TEXT, content TEXT, uses INT DEFAULT 0, 
                 created TIMESTAMPTZ default current_timestamp(0), 
-                last_used TIMESTAMPTZ);'''
+                last_used TIMESTAMPTZ, PRIMARY KEY(name, guild));'''
 
 TABLES = [GUILDS_TABLE, TAG_TABLE]
 
