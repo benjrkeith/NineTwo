@@ -1,12 +1,11 @@
 from discord.ext import commands
-from config import DEFAULT_PREFIX
-
 
 extensions = ('core',)
 
 def callable_prefix(bot, msg):
     config = bot.db.cache.get(msg.guild.id)
-    return config["prefixes"] if config else DEFAULT_PREFIX
+    extras = config['prefixes'] if config else []
+    return commands.when_mentioned_or(*extras)(bot, msg)
 
 class NineTwo(commands.AutoShardedBot):
     def __init__(self, db, *args, **kwargs):
