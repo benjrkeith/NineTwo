@@ -7,8 +7,8 @@ class Core(commands.Cog):
         await ctx.reply('Pong!')
 
 class AdminCore(commands.Cog):
-    def cog_check(self, ctx):
-        return ctx.author.id == ctx.bot.owner_id
+    async def cog_check(self, ctx):
+        return await ctx.bot.is_owner(ctx.author)
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
