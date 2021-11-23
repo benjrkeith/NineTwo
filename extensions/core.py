@@ -6,13 +6,6 @@ class Core(commands.Cog):
     async def ping_cmd(self, ctx):
         await ctx.send('Pong!')
 
-    @commands.command(name='addpre')
-    async def db_addpre(self, ctx, *prefixes):
-        config = ctx.bot.db.cache.get(ctx.guild.id)
-        config['prefixes'].extend(prefixes)
-        config['in-sync'] = False
-        await ctx.send('Prefixes updated.')
-
 class AdminCore(commands.Cog):
     def cog_check(self, ctx):
         return ctx.author.id == 419599149596672001
@@ -24,9 +17,38 @@ class AdminCore(commands.Cog):
     @commands.command(name='exit')
     async def exit_cmd(self, ctx):
         await ctx.send('Exiting.')
-        await ctx.bot.db.close()
-        await ctx.bot.close()
+        await ctx.bot.exit()
+
+class ServerAdminCore(commands.Cog):
+    def cog_check(self, ctx):
+        return True
+
+    async def cog_command_error(self, ctx, error):
+        return await super().cog_command_error(ctx, error)
+
+    @commands.group(name='prefix', invoke_without_command=True)
+    async def prefix_cmd(self, ctx):
+        prefix = await ctx.bot.get_prefix(ctx.message)
+        fltr = filter(lambda p: str(ctx.bot.user.id) not in p, prefix)
+        await ctx.send(list(fltr))
+
+    @prefix_cmd.command(name='new')
+    async def prefix_new_cmd(self, ctx, *, prefix):
+        config = ctx.bot.db.get_config(ctx.guild.id)
+        config['prefixes'].append(prefix)
+        config['in-sync'] = False
+        await ctx.reply('New prefix added.')
+
+    @prefix_cmd.command(name='del')
+    async def prefix_del_cmd(self, ctx, *, prefix):
+        config = ctx.bot.db.get_config(ctx.guild.id, gen=False)
+
+        if config:
+            config['prefixes'].remove(prefix)
+            config['in-sync'] = False
+            await ctx.reply('Prefix removed.')
 
 def setup(bot):
     bot.add_cog(Core())
     bot.add_cog(AdminCore())
+    bot.add_cog(ServerAdminCore())

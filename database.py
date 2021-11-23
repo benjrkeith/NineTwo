@@ -28,11 +28,20 @@ class Database:
                     stat = 'INSERT INTO guilds VALUES ($1, $2)'
 
                 await self.conn.execute(stat, conf['id'], conf['prefixes'])
-                conf['in-sync'] = True
+                conf['in-sync'] = conf['in-db'] = True
 
     async def pull(self):
         records = await self.conn.fetch('SELECT * FROM guilds')
         self.cache = {r['id']: {k: v for k, v in r.items()} for r in records}
+
+    def get_config(self, guild_id, gen=True):
+        conf = self.cache.get(guild_id)
+        return conf if conf else self.new_config(guild_id) if gen else None
+
+    def new_config(self, guild_id):
+        self.cache[guild_id] = {'id': guild_id, 'prefixes': [],
+                                'in-sync': False, 'in-db': False}
+        return self.cache[id]
 
     async def close(self):
         await self.push()

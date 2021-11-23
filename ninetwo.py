@@ -14,3 +14,7 @@ class NineTwo(commands.AutoShardedBot):
 
         for ext in extensions:
             self.load_extension(f'extensions.{ext}')
+
+    async def exit(self):
+        await self.db.close()
+        await self.close()
