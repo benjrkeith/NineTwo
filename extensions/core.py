@@ -1,33 +1,73 @@
-from discord.ext import commands
+from discord.ext import commands as cmds
+from discord.ext.commands import errors
 
 
-class Core(commands.Cog):
-    @commands.command(name='ping')
+class Core(cmds.Cog):
+    @cmds.command(name='ping')
     async def ping_cmd(self, ctx):
         await ctx.reply('Pong!')
 
-class AdminCore(commands.Cog):
+
+class AdminCore(cmds.Cog):
     async def cog_check(self, ctx):
         return await ctx.bot.is_owner(ctx.author)
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
+        if isinstance(error, errors.CheckFailure):
             await ctx.reply('Only my admins can use this command.')
 
-    @commands.command(name='exit')
+    @cmds.command(name='exit')
     async def exit_cmd(self, ctx):
         await ctx.reply('Exiting.')
         await ctx.bot.exit()
 
-class ServerAdminCore(commands.Cog):
+    @cmds.group(name='ext', invoke_without_command=True)
+    async def ext_cmd(self, ctx):
+        await ctx.reply('\n'.join(ctx.bot.extensions.keys()))
+
+    @ext_cmd.command(name='load')
+    async def ext_load_cmd(self, ctx, ext):
+        ext = f'extensions.{ext}'
+        try:
+            ctx.bot.load_extension(ext)
+        except [errors.ExtensionNotFound, errors.ExtensionAlreadyLoaded]:
+            await ctx.reply(f'`{ext}` could not be loaded.')
+        finally:
+            await ctx.reply(f'`{ext}` has been loaded.')
+
+    @ext_cmd.command(name='unload')
+    async def ext_unload_cmd(self, ctx, ext):
+        if ext == 'core':
+            return await ctx.reply('`{ext}` is required.')
+
+        ext = f'extensions.{ext}'
+        try:
+            ctx.bot.unload_extension(ext)
+        except [errors.ExtensionNotFound, errors.ExtensionNotLoaded]:
+            await ctx.reply('`{ext}` could not be unloaded.')
+        finally:
+            await ctx.reply(f'`{ext}` has been unloaded.')
+
+    @ext_cmd.command(name='reload')
+    async def ext_reload_cmd(self, ctx, ext):
+        ext = f'extensions.{ext}'
+        try:
+            ctx.bot.reload_extension(ext)
+        except [errors.ExtensionNotLoaded, errors.ExtensionNotFound]:
+            await ctx.reply('`{ext}` could not be reloaded.')
+        finally:
+            await ctx.reply(f'`{ext}` has been reloaded.')
+
+
+class ServerAdminCore(cmds.Cog):
     def cog_check(self, ctx):
         return ctx.author.guild_permissions.manage_guild
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
+        if isinstance(error, errors.CheckFailure):
             await ctx.reply('Only server admins can use this command.')
 
-    @commands.group(name='prefix', invoke_without_command=True)
+    @cmds.group(name='prefix', invoke_without_command=True)
     async def prefix_cmd(self, ctx):
         prefix = await ctx.bot.get_prefix(ctx.message)
         fltr = filter(lambda p: str(ctx.bot.user.id) not in p, prefix)
@@ -48,6 +88,7 @@ class ServerAdminCore(commands.Cog):
             config['prefixes'].remove(prefix)
             config['in-sync'] = False
             await ctx.reply(f'`{prefix}` removed from prefixes.')
+
 
 def setup(bot):
     bot.add_cog(Core())
