@@ -22,7 +22,7 @@ class Tags(cmds.Cog):
     @cmds.group(name='tag', aliases=['t'], invoke_without_command=True)
     async def tag_cmd(self, ctx, *, tag: Tag):
         target = ctx.message.reference if ctx.message.reference else ctx
-        target.reply(tag.content)
+        await target.reply(tag.content)
 
     @tag_cmd.command(name='new')
     async def tag_new_cmd(self, ctx, name, *, content):
