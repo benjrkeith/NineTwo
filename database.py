@@ -57,6 +57,14 @@ class Database:
         stat = 'SELECT * FROM tags WHERE name=$1 AND guild=$2'
         return await self.conn.fetchrow(stat, tag, guild)
 
+    async def get_tags(self, guild, member=None):
+        if (member):
+            stat = 'SELECT name FROM tags WHERE guild=$1 AND author=$2'
+            return await self.conn.fetch(stat, guild, member)
+
+        stat = 'SELECT name FROM tags WHERE guild=$1'
+        return await self.conn.fetch(stat, guild)
+
     async def new_tag(self, guild, author, name, content):
         stat = '''INSERT INTO tags(guild, author, name, content)
                     VALUES($1, $2, $3, $4);'''

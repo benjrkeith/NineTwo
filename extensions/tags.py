@@ -1,4 +1,5 @@
 from discord.ext import commands as cmds
+import discord
 
 
 class Tag:
@@ -57,8 +58,10 @@ class Tags(cmds.Cog):
         pass
 
     @tag_cmd.command(name='list')
-    async def tag_list_cmd(self, ctx, page, user):
-        pass
+    async def tag_list_cmd(self, ctx, member:discord.Member=None, page=1):
+        member = member.id if member else None
+        tags = await ctx.bot.db.get_tags(ctx.guild.id, member)
+        await ctx.reply('\n'.join([tag['name'] for tag in tags]))
 
 def setup(bot):
     bot.add_cog(Tags())
