@@ -44,7 +44,9 @@ class Tags(cmds.Cog):
 
     @tag_cmd.command(name='info')
     async def tag_info_cmd(self, ctx, *, tag: Tag):
-        await ctx.reply(f'Author: {ctx.guild.get_member(tag.author).name}')
+        author = ctx.guild.get_member(tag.author).name
+        created = tag.created.strftime('%d/%m/%y')
+        await ctx.reply(f'''Author: {author}\nCreated: {created}''')
 
     @tag_cmd.command(name='edit')
     async def tag_edit_cmd(self, ctx, name, *, content):
