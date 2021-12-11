@@ -74,6 +74,10 @@ class Database:
         stat = 'DELETE FROM tags WHERE guild=$1 AND name=$2'
         await self.conn.execute(stat, guild, tag)
 
+    async def edit_tag(self, guild, tag, content):
+        stat = 'UPDATE tags SET content=$1 WHERE guild=$2 AND name=$3'
+        await self.conn.execute(stat, content, guild, tag)
+
     async def close(self):
         await self.push_configs()
         await self.conn.close()

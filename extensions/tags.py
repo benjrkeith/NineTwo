@@ -50,8 +50,12 @@ class Tags(cmds.Cog):
         await ctx.reply(f'''Author: {author}\nCreated: {created}''')
 
     @tag_cmd.command(name='edit')
-    async def tag_edit_cmd(self, ctx, name, *, content):
-        pass
+    async def tag_edit_cmd(self, ctx, tag: Tag, *, content):
+        if (ctx.author.id == tag.author):
+            await ctx.bot.db.edit_tag(ctx.guild.id, tag.name, content)
+            await ctx.reply(f'Tag `{tag.name}` has been updated.')
+        else:
+            await ctx.reply(f'You do not have permission to edit tag `{tag.name}`')
 
     @tag_cmd.command(name='search')
     async def tag_search_cmd(self, ctx, *, term):
