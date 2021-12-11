@@ -1,5 +1,14 @@
+from difflib import SequenceMatcher
+
 from discord.ext import commands as cmds
 import discord
+
+
+# Helper for matching search terms with tag names
+def match(a, b):
+    l, s = (a, b) if len(a) > len(b) else (b, a)
+    sm = SequenceMatcher(lambda s: s == ' ', s, l)
+    return s in l or round(sm.ratio(), 2) * 100 > 80
 
 
 class Tag:
@@ -59,7 +68,9 @@ class Tags(cmds.Cog):
 
     @tag_cmd.command(name='search')
     async def tag_search_cmd(self, ctx, *, term):
-        pass
+        tags = [_['name'] for _ in await ctx.bot.db.get_tags(ctx.guild.id)]
+        matches = filter(lambda x: match(x.lower(), term.lower()), tags)
+        await ctx.reply('\n'.join(matches))
 
     @tag_cmd.command(name='list')
     async def tag_list_cmd(self, ctx, member:discord.Member=None, page=1):
