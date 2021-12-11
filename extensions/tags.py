@@ -19,7 +19,7 @@ class Tag:
 
 
 class Tags(cmds.Cog):
-    @cmds.group(name='tag', aliases=['t'], invoke_without_command=True)
+    @cmds.group(name='tag', aliases=['t', 'tags'], invoke_without_command=True)
     async def tag_cmd(self, ctx, *, tag: Tag):
         target = ctx.message.reference if ctx.message.reference else ctx
         await target.reply(tag.content)
