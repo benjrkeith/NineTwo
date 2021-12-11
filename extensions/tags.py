@@ -30,9 +30,14 @@ class Tags(cmds.Cog):
         await ctx.reply(f'Tag `{name}` has been created.')
 
     @tag_cmd.command(name='del')
-    async def tag_del_cmd(self, ctx, *, name):
-        pass
+    async def tag_del_cmd(self, ctx, *, tag: Tag):
+        if (ctx.author.id == tag.author or ctx.author.guild_permissions.manage_guild):
+            await ctx.bot.db.del_tag(ctx.guild.id, tag.name)
+            await ctx.reply(f'Tag `{tag.name}` deleted successfully.')
+        else:
+            await ctx.reply(f'You do not have permission to delete tag `{tag.name}`')
 
+    # Leaving for now as unsure how to implement.
     @tag_cmd.command(name='alias')
     async def tag_alias_cmd(self, ctx, alias, *, parent):
         pass

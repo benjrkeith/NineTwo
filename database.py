@@ -62,6 +62,10 @@ class Database:
                     VALUES($1, $2, $3, $4);'''
         await self.conn.execute(stat, guild, author, name, content)
 
+    async def del_tag(self, guild, tag):
+        stat = 'DELETE FROM tags WHERE guild=$1 AND name=$2'
+        await self.conn.execute(stat, guild, tag)
+
     async def close(self):
         await self.push_configs()
         await self.conn.close()
