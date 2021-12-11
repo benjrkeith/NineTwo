@@ -8,7 +8,7 @@ import discord
 def match(a, b):
     l, s = (a, b) if len(a) > len(b) else (b, a)
     sm = SequenceMatcher(lambda s: s == ' ', s, l)
-    return s in l or round(sm.ratio(), 2) * 100 > 80
+    return s in l or round(sm.ratio(), 2) * 100 > 70
 
 
 class Tag:
@@ -60,7 +60,7 @@ class Tags(cmds.Cog):
 
     @tag_cmd.command(name='edit')
     async def tag_edit_cmd(self, ctx, tag: Tag, *, content):
-        if (ctx.author.id == tag.author):
+        if ctx.author.id == tag.author:
             await ctx.bot.db.edit_tag(ctx.guild.id, tag.name, content)
             await ctx.reply(f'Tag `{tag.name}` has been updated.')
         else:
